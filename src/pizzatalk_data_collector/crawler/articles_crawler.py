@@ -1,14 +1,10 @@
 from datetime import timedelta
 from urllib.parse import urlparse
 
-from crawler.articles.collect_crawlable_link import collect_crawlable_link
 from crawler.articles.specific_crawler import (
     CRAWLER_IDENTIFIER,
     CRAWLER_REGISTRY,
     NATION_REGISTRY,
-)
-from crawler.articles.specific_crawler.abstract_crawler import (
-    AbstractArticleCrawler,
 )
 from crawler.articles.specific_crawler.europe_articles_crawler import (
     EuropeArticlesCrawler,
@@ -17,7 +13,14 @@ from crawler.articles.utils.date_utils import (
     convert_datetext_to_datetime,
     get_current_time,
 )
-from utils.setup_logger import setup_logger
+
+from pizzatalk_data_collector.common.abstract_crawler import (
+    AbstractArticleCrawler,
+)
+from pizzatalk_data_collector.common.setup_logger import setup_logger
+from pizzatalk_data_collector.crawler.link_collector import (
+    collect_crawlable_link,
+)
 
 fotmob_sources_list = [
     "https://www.fotmob.com/en-GB/leagues/47/news/premier-league",

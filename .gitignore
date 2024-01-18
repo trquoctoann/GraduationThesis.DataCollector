@@ -151,6 +151,3 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-
-credentials.json
-src/data_crawler/crawler/articles/last_time_crawl.txt

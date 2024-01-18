@@ -4,7 +4,8 @@ import gspread
 import pandas as pd
 from importer.preprocessing.articles_preprocessing import pos_tagging
 from oauth2client.service_account import ServiceAccountCredentials
-from utils.setup_logger import setup_logger
+
+from pizzatalk_data_collector.common.setup_logger import setup_logger
 
 
 class ArticlesImporter:
