@@ -1,4 +1,7 @@
 import json
+import os
+import re
+import time
 
 from common.setup_logger import setup_logger
 from constants.entities_enum import EntitiesEnum
@@ -36,7 +39,34 @@ class Crawler:
             return self.api_source.get("product"), ProductsCrawler(None)
         return None, None
 
-    def crawl(self, in_demand_entity):
+    def __export_json(self, in_demand_entity, url, data):
+        directory_name = "crawler"
+        if not os.path.exists(directory_name):
+            os.makedirs(directory_name)
+        export_data = []
+        for each in data:
+            json_object = json.loads(each.to_json())
+            export_data.append(json_object)
+
+        if in_demand_entity in ["product", "option", "option_value"]:
+            file_name = in_demand_entity + re.search(
+                r"GetBySlug\?slug=(.*?)&areaCode", url
+            ).group(1).replace("-", "_")
+        elif in_demand_entity == "store":
+            file_name = in_demand_entity + re.search(
+                r"areaCode=([^&]+)", url
+            ).group(1)
+        else:
+            file_name = in_demand_entity
+
+        with open(
+            os.path.join(directory_name, file_name + ".json"),
+            "w",
+            encoding="utf-8",
+        ) as f:
+            json.dump(export_data, f, ensure_ascii=False, indent=4)
+
+    def crawl(self, in_demand_entity, time_sleep=10):
         self.logger.debug(
             "Begin to crawl data for entity: " + in_demand_entity.upper()
         )
@@ -55,6 +85,13 @@ class Crawler:
             if isinstance(crawler, ProductsCrawler):
                 data.extend(crawler.option_list)
                 data.extend(crawler.option_value_list)
+                self.__export_json("option", url, crawler.option_list)
+                self.__export_json(
+                    "option_value", url, crawler.option_value_list
+                )
+
+            self.__export_json(in_demand_entity, url, current_data)
+            time.sleep(time_sleep)
 
         self.logger.debug(
             "Finished crawling data for entity: " + in_demand_entity.upper()
