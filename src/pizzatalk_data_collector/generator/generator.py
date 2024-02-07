@@ -1,3 +1,4 @@
+import datetime
 import os
 import threading
 import time
@@ -10,11 +11,7 @@ from dotenv import load_dotenv
 from generator.login import bypassing_cloudflare, login_openai
 from generator.utils import find_available_port
 from selenium import webdriver
-from selenium.common.exceptions import (
-    ElementClickInterceptedException,
-    NoSuchElementException,
-    TimeoutException,
-)
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -23,6 +20,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 load_dotenv()
 CHATGPT_EMAIL_ADDRESS = os.getenv("CHATGPT_EMAIL_ADDRESS")
 CHATGPT_PASSWORD = os.getenv("CHATGPT_PASSWORD")
+
+prompts = [
+    [
+        "tạo 20 câu giao tiếp với chủ shop bánh pizza, mẫu câu phù hợp để huấn luyện mô hình nhận diện thực thể",
+        1,
+    ],
+    ["tạo tiếp 20 câu", 24],
+    ["tạo 20 câu sai chính tả", 1],
+    ["tạo tiếp 20 câu sai chính tả", 24],
+]
 
 
 class ChatGPTGenerator:
@@ -70,6 +77,7 @@ class ChatGPTGenerator:
         except (NoSuchElementException, TimeoutException):
             pass
         login_openai(self.driver, email_address, password)
+        time.sleep(3)
         self.logger.debug("Login sucessfully")
 
     def set_chatgpt_version(self, model_version):
@@ -121,45 +129,46 @@ class ChatGPTGenerator:
         self.logger.debug("Generated sucessfully")
         return gpt_elements[-1].text
 
-    def __save_conversation(
-        self, prompt, response, file_name="conversations.txt"
-    ):
+    def __save_conversation(self, response, file_name):
         directory_name = "conversations"
         if not os.path.exists(directory_name):
             os.makedirs(directory_name)
 
-        delimiter = "-----------------------------------------------"
+        response = response.replace('"', "")
         with open(
             os.path.join(directory_name, file_name), "a", encoding="utf-8"
         ) as file:
-            file.write(
-                f"prompt: {prompt}\nresponse: {response}\n\n{delimiter}\n\n"
-            )
+            file.write(f"{response}\n")
 
     def quit(self):
         self.logger.debug("Closing the browser")
         self.driver.close()
         self.driver.quit()
 
-    def generate_for_predefined_prompts(self, prompts, max_retries=3):
+    def generate_for_predefined_prompts(self, prompts=prompts, max_retries=3):
+        kickoff_time = str(datetime.datetime.now().strftime("%Y%m%d_%H%M"))
+        file_name = "response_" + kickoff_time + ".txt"
+
         for prompt in prompts:
-            retry_count = 0
-            while retry_count < max_retries:
-                self.send_prompt_to_chatgpt(prompt)
-                try:
-                    response = self.get_chatgpt_response()
-                    break
-                except TimeoutException:
-                    self.logger.warning(
-                        f"Timeout occurred for prompt: '{prompt}'. Retrying {retry_count + 1}/{max_retries}"
+            prompt_content, prompt_repeat_time = prompt[0], prompt[1]
+            for turn in range(prompt_repeat_time):
+                retry_count = 0
+                while retry_count < max_retries:
+                    self.send_prompt_to_chatgpt(prompt_content)
+                    try:
+                        response = self.get_chatgpt_response()
+                        break
+                    except TimeoutException:
+                        self.logger.warning(
+                            f"Timeout occurred for prompt: '{prompt_content}'. Retrying {retry_count + 1}/{max_retries}"
+                        )
+                        self.driver.refresh()
+                        time.sleep(5)
+                        retry_count += 1
+                if retry_count == max_retries:
+                    self.logger.error(
+                        f"Failed to get response for prompt: '{prompt_content}' after {max_retries} retries."
                     )
-                    self.driver.refresh()
-                    time.sleep(5)
-                    retry_count += 1
-            if retry_count == max_retries:
-                self.logger.error(
-                    f"Failed to get response for prompt: '{prompt}' after {max_retries} retries."
-                )
-                continue
-            self.__save_conversation(prompt, response)
+                    continue
+                self.__save_conversation(response, file_name)
         self.quit()

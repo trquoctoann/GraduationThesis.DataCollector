@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 def bypassing_cloudflare(driver):
-    WebDriverWait(driver, 10).until(
+    WebDriverWait(driver, 4).until(
         EC.presence_of_element_located((By.ID, "challenge-form"))
     )
     driver.find_element(By.ID, "challenge-form").click()
