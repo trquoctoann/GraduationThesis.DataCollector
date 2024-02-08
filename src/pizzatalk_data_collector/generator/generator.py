@@ -23,12 +23,10 @@ CHATGPT_PASSWORD = os.getenv("CHATGPT_PASSWORD")
 
 prompts = [
     [
-        "tạo 20 câu giao tiếp với chủ shop bánh pizza, mẫu câu phù hợp để huấn luyện mô hình nhận diện thực thể",
+        "giả sử bạn là khách hàng muốn đặt bánh pizza online, tạo 20 câu nhắn tin với shop để đặt bánh. Mẫu câu cần phù hợp với mô hình nhận diện thực thể. Văn phong informal",
         1,
     ],
-    ["tạo tiếp 20 câu", 24],
-    ["tạo 20 câu sai chính tả", 1],
-    ["tạo tiếp 20 câu sai chính tả", 24],
+    ["tiếp tục tạo 20 câu, không trùng với các câu trước đó", 9],
 ]
 
 
@@ -44,7 +42,6 @@ class ChatGPTGenerator:
             free_port, ChatGPTGenerator.OPENAI_URL
         )
         self.driver = self.__setup_webdriver(free_port)
-        self.__auto_login()
 
     def __launch_chrome_with_remote_debugging(self, port, url):
         self.logger.debug("Opening new Chrome window in Incognito mode")
@@ -68,16 +65,12 @@ class ChatGPTGenerator:
         driver = setup_selenium(WebDriverType.CHROME_DRIVER, chrome_options)
         return driver
 
-    def __auto_login(
+    def auto_login(
         self, email_address=CHATGPT_EMAIL_ADDRESS, password=CHATGPT_PASSWORD
     ):
         self.logger.debug("Login to ChatGPT")
-        try:
-            bypassing_cloudflare(self.driver)
-        except (NoSuchElementException, TimeoutException):
-            pass
         login_openai(self.driver, email_address, password)
-        time.sleep(3)
+        time.sleep(5)
         self.logger.debug("Login sucessfully")
 
     def set_chatgpt_version(self, model_version):
