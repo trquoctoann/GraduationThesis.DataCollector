@@ -34,10 +34,12 @@ class ChatGPTGenerator:
     OPENAI_URL = "https://chat.openai.com/"
 
     def __init__(self, chrome_path):
-        free_port = find_available_port()
-
         self.logger = setup_logger(__name__, LogsLocation.GENERATOR.value)
         self.chrome_path = chrome_path
+        self.__setup()
+
+    def __setup(self):
+        free_port = find_available_port()
         self.__launch_chrome_with_remote_debugging(
             free_port, ChatGPTGenerator.OPENAI_URL
         )
@@ -65,13 +67,50 @@ class ChatGPTGenerator:
         driver = setup_selenium(WebDriverType.CHROME_DRIVER, chrome_options)
         return driver
 
+    def quit(self):
+        self.logger.debug("Closing the browser")
+        self.driver.close()
+        self.driver.quit()
+
+    def restart(self):
+        self.quit()
+        time.sleep(5)
+        self.__setup()
+        time.sleep(5)
+
     def auto_login(
         self, email_address=CHATGPT_EMAIL_ADDRESS, password=CHATGPT_PASSWORD
     ):
         self.logger.debug("Login to ChatGPT")
-        login_openai(self.driver, email_address, password)
+        retry_count = 0
+        max_retries = 3
+        while retry_count < max_retries:
+            try:
+                login_openai(self.driver, email_address, password)
+                break
+            except TimeoutException:
+                self.logger.warning(
+                    f"Login issue occurred. Retrying {retry_count + 1}/{max_retries}"
+                )
+                self.restart()
+                retry_count += 1
+
+        if retry_count == max_retries:
+            self.logger.error("Login failed, end working session")
+            self.quit()
         time.sleep(5)
         self.logger.debug("Login sucessfully")
+
+    def __save_conversation(self, response, file_name):
+        directory_name = "conversations"
+        if not os.path.exists(directory_name):
+            os.makedirs(directory_name)
+
+        response = response.replace('"', "")
+        with open(
+            os.path.join(directory_name, file_name), "a", encoding="utf-8"
+        ) as file:
+            file.write(f"{response}\n")
 
     def set_chatgpt_version(self, model_version):
         if model_version not in ["GPT-3.5", "GPT-4"]:
@@ -121,22 +160,6 @@ class ChatGPTGenerator:
         )
         self.logger.debug("Generated sucessfully")
         return gpt_elements[-1].text
-
-    def __save_conversation(self, response, file_name):
-        directory_name = "conversations"
-        if not os.path.exists(directory_name):
-            os.makedirs(directory_name)
-
-        response = response.replace('"', "")
-        with open(
-            os.path.join(directory_name, file_name), "a", encoding="utf-8"
-        ) as file:
-            file.write(f"{response}\n")
-
-    def quit(self):
-        self.logger.debug("Closing the browser")
-        self.driver.close()
-        self.driver.quit()
 
     def generate_for_predefined_prompts(self, prompts=prompts, max_retries=3):
         kickoff_time = str(datetime.datetime.now().strftime("%Y%m%d_%H%M"))
