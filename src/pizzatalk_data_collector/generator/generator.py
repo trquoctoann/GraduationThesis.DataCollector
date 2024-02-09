@@ -132,9 +132,7 @@ class ChatGPTGenerator:
         if not self.check_login_status():
             return
         self.logger.debug(
-            'Sending prompt has content: "'
-            + prompt
-            + '" to ChatGPT. Waiting for response'
+            'Sending prompt has content: "' + prompt + '" to ChatGPT'
         )
         wait = WebDriverWait(self.driver, 10)
         input_box = wait.until(
@@ -147,6 +145,7 @@ class ChatGPTGenerator:
         )
         input_box.send_keys(Keys.RETURN)
         input_box.submit()
+        self.logger.debug("Prompt has been sent. Waiting for response.")
 
     def get_chatgpt_response(self):
         if not self.check_login_status():
@@ -171,7 +170,7 @@ class ChatGPTGenerator:
         self.logger.debug("Generated sucessfully")
         return gpt_elements[-1].text
 
-    def generate_for_predefined_prompts(self, prompts=prompts, max_retries=3):
+    def generate_for_predefined_prompts(self, prompts=prompts, max_retries=4):
         if not self.check_login_status():
             return
         kickoff_time = str(datetime.datetime.now().strftime("%Y%m%d_%H%M"))
@@ -182,8 +181,8 @@ class ChatGPTGenerator:
             for turn in range(prompt_repeat_time):
                 retry_count = 0
                 while retry_count < max_retries:
-                    self.send_prompt_to_chatgpt(prompt_content)
                     try:
+                        self.send_prompt_to_chatgpt(prompt_content)
                         response = self.get_chatgpt_response()
                         break
                     except TimeoutException:
