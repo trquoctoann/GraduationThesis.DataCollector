@@ -17,7 +17,7 @@ CHROME_PATH = os.getenv("CHROME_PATH")
 # products = crawler.crawl("product")
 
 today = datetime.now()
-if today.hour == 0 and today.minute <= 10:
+if today.hour == 0 and today.minute == 0:
     yesterday = datetime.now() - timedelta(days=1)
     aggregate_today_response(yesterday.strftime("%Y%m%d"))
 

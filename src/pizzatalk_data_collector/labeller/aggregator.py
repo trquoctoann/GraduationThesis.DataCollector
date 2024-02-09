@@ -1,6 +1,8 @@
 import glob
 import os
 
+import send2trash
+
 
 def read_unique_lines(file_path):
     unique_lines = set()
@@ -32,4 +34,4 @@ def aggregate_today_response(today):
                         encoding="utf-8",
                     ) as file:
                         file.write(f"{sentence}\n")
-            os.remove(file_path)
+            send2trash.send2trash(file_path)

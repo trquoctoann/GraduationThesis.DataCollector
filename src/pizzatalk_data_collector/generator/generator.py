@@ -196,6 +196,7 @@ class ChatGPTGenerator:
                     self.logger.error(
                         f"Failed to get response for prompt: '{prompt_content}' after {max_retries} retries."
                     )
-                    continue
+                    self.quit()
+                    return
                 self.__save_conversation(response, file_name)
         self.quit()
