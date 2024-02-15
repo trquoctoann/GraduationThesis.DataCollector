@@ -32,35 +32,33 @@ prompts = [
 
 class ChatGPTGenerator:
     OPENAI_URL = "https://chat.openai.com/"
+    LOGIN_OPENAI_URL = "https://chat.openai.com/auth/login"
 
     def __init__(self, chrome_path):
         self.port = find_available_port()
         self.logger = setup_logger(__name__, LogsLocation.GENERATOR.value)
         self.chrome_path = chrome_path
-        self.is_login = False
-        self.__setup()
+        self.__setup(self.port, ChatGPTGenerator.OPENAI_URL)
+        self.check_login_status()
 
-    def __setup(self):
-        self.__launch_chrome_with_remote_debugging(
-            self.port, ChatGPTGenerator.OPENAI_URL
-        )
+    def __setup(self, port, url):
+        self.__launch_chrome_with_remote_debugging(port, url)
         self.driver = self.__setup_webdriver(self.port)
 
     def __launch_chrome_with_remote_debugging(self, port, url):
         def open_chrome():
-            chrome_cmd = f"{self.chrome_path} --incognito --remote-debugging-port={port} {url}"
+            chrome_cmd = (
+                f"{self.chrome_path} --remote-debugging-port={port} {url}"
+            )
             os.system(chrome_cmd)
 
         chrome_thread = threading.Thread(target=open_chrome)
         chrome_thread.start()
         time.sleep(5)
-        self.logger.debug(
-            "New Chrome window in Incognito mode has been opened"
-        )
+        self.logger.debug("New Chrome window has been opened")
 
     def __setup_webdriver(self, port):
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--incognito")
         chrome_options.add_experimental_option(
             "debuggerAddress", f"127.0.0.1:{port}"
         )
@@ -72,10 +70,10 @@ class ChatGPTGenerator:
         self.driver.close()
         self.driver.quit()
 
-    def restart(self):
+    def restart(self, port, url):
         self.quit()
         time.sleep(5)
-        self.__setup()
+        self.__setup(port, url)
         time.sleep(5)
 
     def auto_login(
@@ -87,13 +85,12 @@ class ChatGPTGenerator:
         while retry_count < max_retries:
             try:
                 login_openai(self.driver, email_address, password)
-                self.is_login = True
                 break
             except TimeoutException:
                 self.logger.warning(
                     f"Login issue occurred. Retrying {retry_count + 1}/{max_retries}"
                 )
-                self.restart()
+                self.restart(self.port, ChatGPTGenerator.LOGIN_OPENAI_URL)
                 retry_count += 1
 
         if retry_count == max_retries:
@@ -123,14 +120,29 @@ class ChatGPTGenerator:
         ).click()
 
     def check_login_status(self):
-        if not self.is_login:
-            self.logger.error("Unauthorized request")
-            return False
-        return True
+        wait = WebDriverWait(self.driver, 5)
+        try:
+            wait.until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, 'button[data-testid="login-button"]')
+                )
+            )
+            self.auto_login()
+        except TimeoutException:
+            try:
+                wait.until(
+                    EC.presence_of_element_located(
+                        (
+                            By.XPATH,
+                            "//textarea[contains(@id, 'prompt-textarea')]",
+                        )
+                    )
+                )
+            except TimeoutException:
+                self.restart(self.port, ChatGPTGenerator.LOGIN_OPENAI_URL)
+                self.auto_login()
 
     def send_prompt_to_chatgpt(self, prompt):
-        if not self.check_login_status():
-            return
         self.logger.debug(
             'Sending prompt has content: "' + prompt + '" to ChatGPT'
         )
@@ -148,9 +160,6 @@ class ChatGPTGenerator:
         self.logger.debug("Prompt has been sent. Waiting for response.")
 
     def get_chatgpt_response(self):
-        if not self.check_login_status():
-            return
-
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located(
                 (By.XPATH, '//div[contains(@class, "result-streaming")]')
@@ -171,8 +180,6 @@ class ChatGPTGenerator:
         return gpt_elements[-1].text
 
     def generate_for_predefined_prompts(self, prompts=prompts, max_retries=4):
-        if not self.check_login_status():
-            return
         kickoff_time = str(datetime.datetime.now().strftime("%Y%m%d_%H%M"))
         file_name = "response_" + kickoff_time + ".txt"
 

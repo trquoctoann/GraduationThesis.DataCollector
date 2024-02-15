@@ -22,5 +22,4 @@ if today.hour == 0 and today.minute == 0:
     aggregate_today_response(yesterday.strftime("%Y%m%d"))
 
 chatgpt = ChatGPTGenerator(chrome_path=CHROME_PATH)
-chatgpt.auto_login()
 chatgpt.generate_for_predefined_prompts()
