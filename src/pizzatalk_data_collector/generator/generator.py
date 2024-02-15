@@ -11,7 +11,10 @@ from dotenv import load_dotenv
 from generator.login import bypassing_cloudflare, login_openai
 from generator.utils import find_available_port
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    TimeoutException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -23,10 +26,9 @@ CHATGPT_PASSWORD = os.getenv("CHATGPT_PASSWORD")
 
 prompts = [
     [
-        "giả sử bạn là khách hàng muốn đặt bánh pizza online, tạo 20 câu nhắn tin với shop để đặt bánh. Mẫu câu cần phù hợp với mô hình nhận diện thực thể.",
-        1,
-    ],
-    ["tiếp tục tạo 20 câu, không trùng với các câu trước đó", 9],
+        "Suppose you are a customer wanting to order pizza online. Create 15 text messages to the shop to place your order. The sentence format should be compatible with the entity recognition model.",
+        10,
+    ]
 ]
 
 
@@ -99,6 +101,12 @@ class ChatGPTGenerator:
             return
         time.sleep(5)
         self.logger.debug("Login successfully")
+
+    def new_conversation(self):
+        try:
+            self.driver.find_element(By.LINK_TEXT, "New chat").click()
+        except ElementClickInterceptedException:
+            pass
 
     def __save_conversation(self, response, file_name):
         directory_name = "conversations"
@@ -186,6 +194,9 @@ class ChatGPTGenerator:
         for prompt in prompts:
             prompt_content, prompt_repeat_time = prompt[0], prompt[1]
             for turn in range(prompt_repeat_time):
+                if turn % 2 == 0 and turn != 0:
+                    self.new_conversation()
+                    time.sleep(3)
                 retry_count = 0
                 while retry_count < max_retries:
                     try:
