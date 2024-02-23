@@ -1,5 +1,5 @@
 from crawler.crawler import Crawler
-from generator.generator import using_chatgpt_to_generate_data
+from generator.generator import Generator
 
 # crawler = Crawler()
 # areas = crawler.crawl("area")
@@ -8,4 +8,5 @@ from generator.generator import using_chatgpt_to_generate_data
 # deals = crawler.crawl("deal")
 # products = crawler.crawl("product")
 
-using_chatgpt_to_generate_data()
+generator = Generator()
+generator.start_generate()

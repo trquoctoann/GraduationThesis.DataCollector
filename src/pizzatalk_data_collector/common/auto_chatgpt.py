@@ -22,13 +22,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 load_dotenv()
 CHATGPT_EMAIL_ADDRESS = os.getenv("CHATGPT_EMAIL_ADDRESS")
 CHATGPT_PASSWORD = os.getenv("CHATGPT_PASSWORD")
+CHROME_PATH = os.getenv("CHROME_PATH")
 
 
 class AutoChatGPT:
     OPENAI_URL = "https://chat.openai.com"
 
     def __init__(
-        self, chrome_path, logs_location=LogsLocation.GENERATOR.value
+        self,
+        chrome_path=CHROME_PATH,
+        logs_location=LogsLocation.GENERATOR.value,
     ):
         self.port = self.__find_available_port()
         self.logger = setup_logger(__name__, logs_location)
@@ -139,17 +142,6 @@ class AutoChatGPT:
         except ElementClickInterceptedException:
             pass
 
-    def __save_conversation(self, response, file_name):
-        directory_name = "conversations"
-        if not os.path.exists(directory_name):
-            os.makedirs(directory_name)
-
-        response = response.replace('"', "")
-        with open(
-            os.path.join(directory_name, file_name), "a", encoding="utf-8"
-        ) as file:
-            file.write(f"{response}\n")
-
     def set_chatgpt_version(self, model_version):
         if model_version not in ["GPT-3.5", "GPT-4"]:
             msg = "model_version must be GPT-3.5 or GPT-4"
@@ -237,35 +229,3 @@ class AutoChatGPT:
                     f"Failed to get response after {max_retries} retries."
                 )
         return ""
-
-    def generate_for_predefined_prompts(self, prompts, max_retries=4):
-        kickoff_time = str(datetime.datetime.now().strftime("%Y%m%d_%H%M"))
-        file_name = "response_" + kickoff_time + ".txt"
-
-        for prompt in prompts:
-            prompt_content, prompt_repeat_time = prompt[0], prompt[1]
-            for turn in range(prompt_repeat_time):
-                if turn % 2 == 0 and turn != 0:
-                    self.new_conversation()
-                    time.sleep(3)
-                retry_count = 0
-                while retry_count < max_retries:
-                    try:
-                        self.send_prompt_to_chatgpt(prompt_content)
-                        response = self.get_chatgpt_response()
-                        break
-                    except TimeoutException:
-                        self.logger.warning(
-                            f"Timeout occurred for prompt: '{prompt_content}'. Retrying {retry_count + 1}/{max_retries}"
-                        )
-                        self.driver.refresh()
-                        time.sleep(5)
-                        retry_count += 1
-                if retry_count == max_retries:
-                    self.logger.error(
-                        f"Failed to get response for prompt: '{prompt_content}' after {max_retries} retries."
-                    )
-                    self.quit()
-                    return
-                self.__save_conversation(response, file_name)
-        self.quit()
