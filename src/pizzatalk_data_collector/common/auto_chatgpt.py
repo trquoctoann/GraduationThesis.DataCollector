@@ -71,18 +71,21 @@ class AutoChatGPT:
 
         wait.until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, "button.btn.relative.btn-neutral")
+                (
+                    By.XPATH,
+                    "//button[contains(@class, 'btn-neutral') and .//div[contains(text(), 'Log in')]]",
+                )
             )
         ).click()
 
         wait.until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, 'input[name="username"]')
+                (By.CSS_SELECTOR, 'input[name="email"]')
             )
         ).send_keys(email_address)
 
         self.driver.find_element(
-            By.CSS_SELECTOR, 'button[name="action"]'
+            By.CSS_SELECTOR, "button.continue-btn"
         ).click()
 
         wait.until(
@@ -160,7 +163,10 @@ class AutoChatGPT:
         try:
             wait.until(
                 EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, "button.btn.relative.btn-neutral")
+                    (
+                        By.XPATH,
+                        "//button[contains(@class, 'btn-neutral') and .//div[contains(text(), 'Log in')]]",
+                    )
                 )
             )
             self.auto_login()
@@ -218,6 +224,7 @@ class AutoChatGPT:
         while retry_count < max_retries:
             try:
                 response = gpt_elements[-1].text
+                return response
             except Exception:
                 self.logger.debug(
                     f"Failed to get response. Retrying {retry_count + 1}/{max_retries}"
@@ -229,8 +236,7 @@ class AutoChatGPT:
                 self.logger.debug(
                     f"Failed to get response after {max_retries} retries."
                 )
-                response = ""
-        return response
+        return ""
 
     def generate_for_predefined_prompts(self, prompts, max_retries=4):
         kickoff_time = str(datetime.datetime.now().strftime("%Y%m%d_%H%M"))
