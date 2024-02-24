@@ -154,3 +154,4 @@ cython_debug/
 
 conversations
 src/pizzatalk_data_collector/labeller/last_read_position.txt
+src/pizzatalk_data_collector/labeller/last_labeled_position.txt
