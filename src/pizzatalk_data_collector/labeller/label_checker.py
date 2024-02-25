@@ -12,6 +12,7 @@ class LabelChecker:
         self.data_source = self.load_data_from_json(data_source_path)
         self.output_path = output_path
         self.current_index = self.read_last_position()
+        self.start_index = self.read_last_position()
         self.edited_data = {}
         self.checked_states = {}
         self.current_number_of_label_checked = 0
@@ -141,14 +142,14 @@ class LabelChecker:
             self.data_source[self.current_index]["label"][
                 self.tree.index(self.current_item)
             ] = new_label
-            self.edited_data[self.current_index] = True
             self.combobox.place_forget()
 
     def save_changes(self):
         current_data = self.data_source[self.current_index]
+        if self.current_index not in self.edited_data:
+            self.current_number_of_label_checked += 1
         self.edited_data[self.current_index] = current_data
         self.checked_states[self.current_index] = True
-        self.current_number_of_label_checked += 1
         self.update_ui_for_current_object()
         self.load_next_data()
 
@@ -174,7 +175,7 @@ class LabelChecker:
             )
 
     def load_prev_data(self):
-        if self.current_index > 0:
+        if self.current_index > self.start_index:
             self.current_index -= 1
             self.update_ui_for_current_object()
             self.display_data()
