@@ -24,7 +24,7 @@ class StoresCrawler(AbstractCrawler):
                     name=store.get("name"),
                     address=store.get("address"),
                     phone_number=store.get("phoneNumber"),
-                    email_address=store.get("emailAddress"),
+                    email=store.get("emailAddress"),
                     allow_delivery=store.get("allowDelivery"),
                     allow_pickup=store.get("allowPickup"),
                     country=store.get("country"),

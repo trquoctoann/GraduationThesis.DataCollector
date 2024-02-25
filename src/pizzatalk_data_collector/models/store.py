@@ -8,7 +8,7 @@ class Store:
         name,
         address,
         phone_number,
-        email_address,
+        email,
         allow_delivery,
         allow_pickup,
         country,
@@ -23,7 +23,7 @@ class Store:
         self.name = name
         self.address = address
         self.phone_number = phone_number
-        self.email_address = email_address
+        self.email = email
         self.allow_delivery = allow_delivery
         self.allow_pickup = allow_pickup
         self.country = country
@@ -41,7 +41,7 @@ class Store:
                 "name": self.name,
                 "address": self.address,
                 "phoneNumber": self.phone_number,
-                "emailAddress": self.email_address,
+                "email": self.email,
                 "allowDelivery": self.allow_delivery,
                 "allowPickup": self.allow_pickup,
                 "country": self.country,

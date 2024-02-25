@@ -40,7 +40,7 @@ class Crawler:
         return None, None
 
     def __export_json(self, in_demand_entity, url, data):
-        directory_name = "crawler"
+        directory_name = "crawler_result"
         if not os.path.exists(directory_name):
             os.makedirs(directory_name)
         export_data = []
