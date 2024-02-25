@@ -1,20 +1,21 @@
 import json
 import os
 import tkinter as tk
+from datetime import datetime
 from tkinter import messagebox, ttk
 
 from constants.entity_iob_label import EntityIOBLabel
 
 
 class LabelChecker:
-    def __init__(self, root, data_source_path, output_path):
+    def __init__(self, root, data_source_path):
         self.root = root
         self.data_source = self.load_data_from_json(data_source_path)
-        self.output_path = output_path
         self.current_index = self.read_last_position()
         self.start_index = self.read_last_position()
         self.edited_data = {}
         self.checked_states = {}
+        self.output_path = self.get_output_filepath()
         self.current_number_of_label_checked = 0
 
         self.setup_ui()
@@ -109,6 +110,13 @@ class LabelChecker:
         except (FileNotFoundError, ValueError):
             return 0
 
+    def get_output_filepath(self):
+        return (
+            "conversations\\order\\final_label_"
+            + str(datetime.now().strftime("%Y%m%d"))
+            + ".json"
+        )
+
     def display_data(self):
         for i in self.tree.get_children():
             self.tree.delete(i)
@@ -185,7 +193,8 @@ class LabelChecker:
                 "This is the first data object. There is no previous data to display.",
             )
 
-    def saving_result(self, filename, checked_data):
+    def saving_result(self, checked_data):
+        filename = self.output_path
         if os.path.exists(filename) and os.path.getsize(filename) > 0:
             with open(filename, "r+", encoding="utf-8") as file:
                 content = file.read()
@@ -208,7 +217,6 @@ class LabelChecker:
 
     def finish_labeling(self):
         self.saving_result(
-            self.output_path,
             [self.edited_data[i] for i in sorted(self.edited_data.keys())],
         )
 

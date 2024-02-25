@@ -7,6 +7,5 @@ root.title("Data Checker")
 app = LabelChecker(
     root,
     "conversations\\order\\ideal_order.json",
-    "conversations\\order\\final_label.json",
 )
 root.mainloop()
