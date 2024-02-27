@@ -13,7 +13,7 @@ class EntityIOBLabel(Enum):
     B_QUANTITY = "B-Quantity"
     I_QUANTITY = "I-Quantity"
     B_CUSTOMER_NAME = "B-Cus"
-    I_CUSTOMER_NAME = "I-CUS"
+    I_CUSTOMER_NAME = "I-Cus"
     B_PHONE_NUMBER = "B-Phone"
     I_PHONE_NUMBER = "I-Phone"
     B_ADDRESS = "B-Address"

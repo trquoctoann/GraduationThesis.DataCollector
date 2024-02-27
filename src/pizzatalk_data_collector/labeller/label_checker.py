@@ -22,6 +22,10 @@ class LabelChecker:
         self.display_data()
 
     def setup_ui(self):
+        style = ttk.Style()
+        style.configure("Treeview.Heading", font=("Times New Roman", 12))
+        style.configure("Treeview", font=("Times New Roman", 15))
+
         self.frame = tk.Frame(self.root)
         self.frame.pack(fill=tk.BOTH, expand=True)
 
@@ -43,7 +47,7 @@ class LabelChecker:
         self.number_checked_label.pack(side=tk.TOP, fill=tk.X, padx=10, pady=5)
 
         self.status_label = tk.Label(
-            self.frame, text="", fg="green", font=("Arial", 10)
+            self.frame, text="", fg="green", font=("Arial", 12)
         )
         self.status_label.pack(side=tk.TOP, fill=tk.X, padx=10, pady=5)
 
