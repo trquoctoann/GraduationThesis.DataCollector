@@ -26,7 +26,7 @@ class ProductsCrawler(AbstractCrawler):
                 Product(
                     original_id=product.get("id"),
                     name=product.get("name"),
-                    product_size=product.get("productSize"),
+                    size=product.get("productSize"),
                     slug=product.get("slug"),
                     description=product.get("shortDescription"),
                     sku=product.get("sku"),
@@ -38,9 +38,7 @@ class ProductsCrawler(AbstractCrawler):
                     product_variations=self.__get_product_variations_id(
                         product
                     ),
-                    product_options=self.__get_option_and_option_value(
-                        product
-                    ),
+                    options=self.__get_option_and_option_value(product),
                     category_original_id=product.get("categoryId"),
                 )
             )

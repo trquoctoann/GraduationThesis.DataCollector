@@ -6,7 +6,7 @@ class Product:
         self,
         original_id,
         name,
-        product_size,
+        size,
         slug,
         description,
         sku,
@@ -14,12 +14,12 @@ class Product:
         image_path,
         parent_original_id,
         product_variations,
-        product_options,
+        options,
         category_original_id,
     ):
         self.original_id = original_id
         self.name = name
-        self.product_size = product_size
+        self.size = size
         self.slug = slug
         self.description = description
         self.sku = sku
@@ -27,7 +27,7 @@ class Product:
         self.image_path = image_path
         self.parent_original_id = parent_original_id
         self.product_variations = product_variations
-        self.product_options = product_options
+        self.options = options
         self.category_original_id = category_original_id
 
     def to_json(self):
@@ -35,7 +35,7 @@ class Product:
             {
                 "originalId": self.original_id,
                 "name": self.name,
-                "productSize": self.product_size,
+                "size": self.size,
                 "slug": self.slug,
                 "description": self.description,
                 "sku": self.sku,
@@ -43,7 +43,7 @@ class Product:
                 "imagePath": self.image_path,
                 "parentOriginalId": self.parent_original_id,
                 "productVariations": self.product_variations,
-                "productOptions": self.product_options,
+                "options": self.options,
                 "categoryOriginalId": self.category_original_id,
             },
             ensure_ascii=False,
