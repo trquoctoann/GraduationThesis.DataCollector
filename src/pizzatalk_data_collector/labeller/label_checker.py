@@ -24,7 +24,7 @@ class LabelChecker:
     def setup_ui(self):
         style = ttk.Style()
         style.configure("Treeview.Heading", font=("Times New Roman", 12))
-        style.configure("Treeview", font=("Times New Roman", 15))
+        style.configure("Treeview", font=("Times New Roman", 12))
 
         self.frame = tk.Frame(self.root)
         self.frame.pack(fill=tk.BOTH, expand=True)
