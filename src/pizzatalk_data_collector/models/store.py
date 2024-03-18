@@ -4,7 +4,6 @@ import json
 class Store:
     def __init__(
         self,
-        original_id,
         name,
         address,
         phone_number,
@@ -19,7 +18,6 @@ class Store:
         opening_hour,
         image_path,
     ):
-        self.original_id = original_id
         self.name = name
         self.address = address
         self.phone_number = phone_number
@@ -37,11 +35,11 @@ class Store:
     def to_json(self):
         return json.dumps(
             {
-                "originalId": self.original_id,
                 "name": self.name,
                 "address": self.address,
                 "phoneNumber": self.phone_number,
                 "email": self.email,
+                "status": "ACTIVE",
                 "allowDelivery": self.allow_delivery,
                 "allowPickup": self.allow_pickup,
                 "country": self.country,

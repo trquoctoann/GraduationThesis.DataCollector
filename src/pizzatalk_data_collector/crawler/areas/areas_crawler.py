@@ -20,11 +20,9 @@ class AreasCrawler(AbstractCrawler):
         for area in original_store_areas:
             result_areas.append(
                 Area(
-                    original_id=area.get("id"),
                     name=area.get("name"),
                     code=area.get("code"),
                     brand_code=area.get("brandCode"),
-                    store_count=area.get("storeCount"),
                     price_group_id=area.get("priceGroupId"),
                 )
             )

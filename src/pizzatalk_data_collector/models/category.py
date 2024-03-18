@@ -2,8 +2,7 @@ import json
 
 
 class Category:
-    def __init__(self, original_id, name, description, image_path):
-        self.original_id = original_id
+    def __init__(self, name, description, image_path):
         self.name = name
         self.description = description
         self.image_path = image_path
@@ -11,9 +10,9 @@ class Category:
     def to_json(self):
         return json.dumps(
             {
-                "originalId": self.original_id,
                 "name": self.name,
                 "description": self.description,
+                "status": "ACTIVE",
                 "imagePath": self.image_path,
             },
             ensure_ascii=False,

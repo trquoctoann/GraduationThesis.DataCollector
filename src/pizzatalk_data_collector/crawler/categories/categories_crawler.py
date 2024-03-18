@@ -20,7 +20,6 @@ class CategoriesCrawler(AbstractCrawler):
         for category in original_categories:
             result_categories.append(
                 Category(
-                    original_id=category.get("id"),
                     name=category.get("name"),
                     description=category.get("shortDescription"),
                     image_path=self.__get_image_path(

@@ -48,7 +48,7 @@ class Crawler:
             json_object = json.loads(each.to_json())
             export_data.append(json_object)
 
-        if in_demand_entity in ["product", "option", "option_value"]:
+        if in_demand_entity in ["product", "option", "option_detail"]:
             file_name = in_demand_entity + re.search(
                 r"GetBySlug\?slug=(.*?)&areaCode", url
             ).group(1).replace("-", "_")
@@ -84,10 +84,10 @@ class Crawler:
             data.extend(current_data)
             if isinstance(crawler, ProductsCrawler):
                 data.extend(crawler.option_list)
-                data.extend(crawler.option_value_list)
+                data.extend(crawler.option_detail_list)
                 self.__export_json("option", url, crawler.option_list)
                 self.__export_json(
-                    "option_value", url, crawler.option_value_list
+                    "option_detail", url, crawler.option_detail_list
                 )
 
             self.__export_json(in_demand_entity, url, current_data)

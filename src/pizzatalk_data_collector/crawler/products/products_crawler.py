@@ -2,7 +2,7 @@ from common.abstract_crawler import AbstractCrawler
 from common.setup_logger import setup_logger
 from constants.logs_location import LogsLocation
 from models.option import Option
-from models.option_value import OptionValue
+from models.option_detail import OptionDetail
 from models.product import Product
 
 
@@ -11,7 +11,8 @@ class ProductsCrawler(AbstractCrawler):
         super().__init__(request_url)
         self.logger = setup_logger(__name__, LogsLocation.CRAWLER.value)
         self.option_list = []
-        self.option_value_list = []
+        self.option_detail_list = []
+        self.option_code_unique = set()
 
     def extract_data(self, json_response):
         result = json_response.get("result")
@@ -24,7 +25,6 @@ class ProductsCrawler(AbstractCrawler):
         for product in original_products:
             result_products.append(
                 Product(
-                    original_id=product.get("id"),
                     name=product.get("name"),
                     size=product.get("productSize"),
                     slug=product.get("slug"),
@@ -34,12 +34,7 @@ class ProductsCrawler(AbstractCrawler):
                     image_path=self.__get_image_path(
                         product.get("productThumbnail")
                     ),
-                    parent_original_id=product.get("parentId"),
-                    product_variations=self.__get_product_variations_id(
-                        product
-                    ),
-                    options=self.__get_option_and_option_value(product),
-                    category_original_id=product.get("categoryId"),
+                    options=self.__get_option_and_option_detail(product),
                 )
             )
         return result_products
@@ -61,37 +56,29 @@ class ProductsCrawler(AbstractCrawler):
             return "https://api.alfrescos.com.vn/uploads/images/" + image_path
         return None
 
-    def __get_option_and_option_value(self, product):
+    def __get_option_and_option_detail(self, product):
         options_of_current_product = []
-        for option_value in product["productOptionValues"]:
-            option = option_value["option"]
-            self.option_list.append(
-                Option(
-                    original_id=option.get("id"),
-                    name=option.get("name"),
-                    code=option.get("code"),
-                    is_multi=option.get("isMulti"),
-                    is_required=option.get("isRequired"),
+        for option_detail in product["productOptionValues"]:
+            option = option_detail["option"]
+            if option.get("code") not in self.option_code_unique:
+                self.option_list.append(
+                    Option(
+                        name=option.get("name"),
+                        code=option.get("code"),
+                        is_multi=option.get("isMulti"),
+                        is_required=option.get("isRequired"),
+                    )
+                )
+                self.option_code_unique.add(option.get("code"))
+            self.option_detail_list.append(
+                OptionDetail(
+                    name=option_detail.get("value"),
+                    sku=option_detail.get("sku"),
+                    code=option_detail.get("code"),
+                    uom_id=option_detail.get("uomId"),
+                    price=option_detail.get("price"),
+                    quantity=option_detail.get("quantity"),
                 )
             )
-            self.option_value_list.append(
-                OptionValue(
-                    original_id=option_value.get("id"),
-                    value=option_value.get("value"),
-                    sku=option_value.get("sku"),
-                    code=option_value.get("code"),
-                    uom_id=option_value.get("uomId"),
-                    price=option_value.get("price"),
-                    quantity=option_value.get("quantity"),
-                    option_original_id=option_value.get("optionId"),
-                    product_original_id=option_value.get("productId"),
-                )
-            )
-            options_of_current_product.append(option_value.get("id"))
+            options_of_current_product.append(option_detail.get("id"))
         return options_of_current_product
-
-    def __get_product_variations_id(self, product):
-        product_variations_id_list = []
-        for variation in product["productVariations"]:
-            product_variations_id_list.append(variation["id"])
-        return product_variations_id_list

@@ -12,7 +12,7 @@ from selenium.common.exceptions import TimeoutException
 
 prompts = [
     [
-        "Suppose you are a customer order pizza online and you just completed your order. Create 15 text messages to the shop to provide your information for shipping process. The sentence format should be compatible with the entity recognition model.",
+        "Suppose you are a customer order pizza online. Create 15 text messages to the shop.",
         10,
     ]
 ]

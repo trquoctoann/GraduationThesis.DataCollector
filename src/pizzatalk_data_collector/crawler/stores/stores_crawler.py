@@ -20,7 +20,6 @@ class StoresCrawler(AbstractCrawler):
         for store in original_stores:
             result_stores.append(
                 Store(
-                    original_id=store.get("id"),
                     name=store.get("name"),
                     address=store.get("address"),
                     phone_number=store.get("phoneNumber"),

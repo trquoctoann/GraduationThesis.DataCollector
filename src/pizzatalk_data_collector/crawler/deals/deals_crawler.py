@@ -20,14 +20,12 @@ class DealsCrawler(AbstractCrawler):
         for deal in original_deals:
             result_deals.append(
                 Deal(
-                    original_id=deal.get("id"),
                     name=deal.get("name"),
                     description=deal.get("description"),
                     deal_no=deal.get("dealNo"),
                     price=deal.get("dealPrice"),
                     slug=deal.get("slug"),
                     deal_variations=self.__get_deal_variations_id(deal),
-                    original_parent_id=deal.get("parentId"),
                     image_path=self.__get_image_path(deal.get("dealImage")),
                 )
             )
