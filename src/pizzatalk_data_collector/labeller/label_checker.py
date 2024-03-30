@@ -74,26 +74,27 @@ class LabelChecker:
         self.label_options = [
             EntityIOBLabel.OTHER.value,
             EntityIOBLabel.B_QUANTITY.value,
-            EntityIOBLabel.I_QUANTITY.value,
             EntityIOBLabel.B_PIZZA.value,
             EntityIOBLabel.I_PIZZA.value,
             EntityIOBLabel.B_TOPPING.value,
-            EntityIOBLabel.I_TOPPING.value,
             EntityIOBLabel.B_SIZE.value,
             EntityIOBLabel.I_SIZE.value,
             EntityIOBLabel.B_CRUST.value,
             EntityIOBLabel.I_CRUST.value,
-            EntityIOBLabel.B_CUSTOMER_NAME.value,
-            EntityIOBLabel.I_CUSTOMER_NAME.value,
             EntityIOBLabel.B_PHONE_NUMBER.value,
             EntityIOBLabel.I_PHONE_NUMBER.value,
+            EntityIOBLabel.B_CUSTOMER_NAME.value,
+            EntityIOBLabel.I_CUSTOMER_NAME.value,
             EntityIOBLabel.B_ADDRESS.value,
             EntityIOBLabel.I_ADDRESS.value,
             EntityIOBLabel.B_PAYMENT_METHOD.value,
             EntityIOBLabel.I_PAYMENT_METHOD.value,
         ]
         self.combobox = ttk.Combobox(
-            self.root, values=self.label_options, state="readonly"
+            self.root,
+            values=self.label_options,
+            state="readonly",
+            height=len(self.label_options),
         )
         self.combobox.bind("<<ComboboxSelected>>", self.on_label_selected)
 
@@ -116,7 +117,7 @@ class LabelChecker:
 
     def get_output_filepath(self):
         return (
-            "conversations\\order\\final_label_"
+            "conversations\\entity\\order\\final_label_"
             + str(datetime.now().strftime("%Y%m%d"))
             + ".json"
         )
